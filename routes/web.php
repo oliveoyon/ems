@@ -19,17 +19,49 @@ use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Web\WebController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('tests', [TestController::class, 'test']);
+Route::get('/migrate-and-seed', function () {
+  // Run migration
+  Artisan::call('migrate');
 
-Route::get('/', function () {
-    return view('dashboard.admin.login1');
-    // return redirect('/admin/login');
+  // Run DatabaseSeeder seeder
+  Artisan::call('db:seed --class=DatabaseSeeder');
+
+  return 'Database migrated and seeded successfully.';
 });
+
+Route::get('/symlink', function () {
+  Artisan::call('storage:link');
+});
+
+
+
+// Web Routes
+
+Route::get('/', [WebController::class, 'index'])->name('index');
+Route::get('notice-board/{cat}', [WebController::class, 'allnotice'])->name('allnotice');
+Route::get('contact', [WebController::class, 'contact'])->name('contact');
+Route::get('all-download', [WebController::class, 'alldownload'])->name('alldownload');
+Route::get('history-details', [WebController::class, 'history_details'])->name('history-details');
+Route::get('notice/{slug}', [WebController::class, 'notice'])->name('notice');
+Route::get('message/{slug}', [WebController::class, 'message'])->name('message');
+Route::get('download/{slug}', [WebController::class, 'download'])->name('download');
+Route::get('mujib-corner', [WebController::class, 'mujib_corner'])->name('mujib-corner');
+Route::get('mujib-corner-detail/{slug}', [WebController::class, 'mujib_detail'])->name('mujib_detail');
+Route::get('/{slug}', [WebController::class, 'menudesc'])->name('menudesc');
+Route::get('/child-menu/{childSlug}', [WebController::class, 'submenudesc'])->name('submenudesc');
+
+// Web Routes Ends
+
+
+
+
+Route::get('tests', [TestController::class, 'test']);
 
 Route::get('admission-form', [GeneralController::class, 'admissionApply'])->name('admissionApply');
 Route::post('/get-classes-by-version', [GeneralController::class, 'getClassesByVersion'])->name('getClassesByVersion');
@@ -37,21 +69,10 @@ Route::post('/stdApply', [GeneralController::class, 'stdApply'])->name('stdApply
 Route::get('/getslip/{std_hash_id}', [GeneralController::class, 'getslip'])->name('getslip');
 Route::get('/getslip1/{std_hash_id}', [GeneralController::class, 'getslip1'])->name('getslip1');
 
-Route::get('/migrate-and-seed', function () {
-    // Run migration
-    Artisan::call('migrate');
-
-    // Run DatabaseSeeder seeder
-    Artisan::call('db:seed --class=DatabaseSeeder');
-
-    return 'Database migrated and seeded successfully.';
-});
-
 Route::get('lang/{lang}', ['as' => 'lang.switch', 'uses' => 'App\Http\Controllers\LanguageController@switchLang']);
 
 Auth::routes();
 
-//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::prefix('user')->name('user.')->group(function () {
 
